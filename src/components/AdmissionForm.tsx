@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Upload, User, Mail, Phone, Calendar, BookOpen } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import jsPDF from 'jspdf';
 
 interface FormData {
   name: string;
@@ -66,8 +67,49 @@ const AdmissionForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text('Excellence University', 20, 30);
+    doc.setFontSize(16);
+    doc.text('Admission Application Form', 20, 45);
+    
+    // Application details
+    doc.setFontSize(12);
+    doc.text(`Application ID: APP${Date.now()}`, 20, 65);
+    doc.text(`Submitted on: ${new Date().toLocaleDateString()}`, 20, 75);
+    
+    // Student details
+    doc.setFontSize(14);
+    doc.text('Student Information:', 20, 95);
+    doc.setFontSize(12);
+    doc.text(`Name: ${formData.name}`, 25, 110);
+    doc.text(`Date of Birth: ${formData.dateOfBirth}`, 25, 125);
+    doc.text(`Email: ${formData.email}`, 25, 140);
+    doc.text(`Contact Number: ${formData.contactNumber}`, 25, 155);
+    doc.text(`Selected Course: ${formData.selectedCourse}`, 25, 170);
+    
+    if (formData.photo) {
+      doc.text(`Photo: ${formData.photo.name}`, 25, 185);
+    }
+    if (formData.documents) {
+      doc.text(`Documents: ${formData.documents.name}`, 25, 200);
+    }
+    
+    // Footer
+    doc.text('Thank you for your application!', 20, 250);
+    doc.text('We will contact you soon with further details.', 20, 265);
+    
+    // Download the PDF
+    doc.save(`admission-form-${formData.name.replace(/\s+/g, '-')}.pdf`);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log('Form submitted with data:', formData);
     
     if (!validateForm()) {
       toast({
@@ -78,35 +120,56 @@ const AdmissionForm = () => {
       return;
     }
 
-    // Save to localStorage
-    const existingApplications = JSON.parse(localStorage.getItem('studentApplications') || '[]');
-    const newApplication = {
-      id: Date.now(),
-      ...formData,
-      submittedAt: new Date().toISOString(),
-      photo: formData.photo?.name || '',
-      documents: formData.documents?.name || '',
-    };
-    
-    existingApplications.push(newApplication);
-    localStorage.setItem('studentApplications', JSON.stringify(existingApplications));
+    try {
+      // Save to localStorage
+      const existingApplications = JSON.parse(localStorage.getItem('studentApplications') || '[]');
+      const newApplication = {
+        id: Date.now(),
+        ...formData,
+        submittedAt: new Date().toISOString(),
+        photo: formData.photo?.name || '',
+        documents: formData.documents?.name || '',
+      };
+      
+      existingApplications.push(newApplication);
+      localStorage.setItem('studentApplications', JSON.stringify(existingApplications));
 
-    toast({
-      title: "Application Submitted!",
-      description: "Your admission application has been submitted successfully.",
-    });
+      console.log('Application saved to localStorage:', newApplication);
 
-    // Reset form
-    setFormData({
-      name: '',
-      dateOfBirth: '',
-      email: '',
-      contactNumber: '',
-      selectedCourse: '',
-      photo: null,
-      documents: null,
-    });
-    setErrors({});
+      // Generate and download PDF
+      generatePDF();
+
+      toast({
+        title: "Application Submitted Successfully!",
+        description: "Your admission form has been downloaded automatically.",
+      });
+
+      // Reset form
+      setFormData({
+        name: '',
+        dateOfBirth: '',
+        email: '',
+        contactNumber: '',
+        selectedCourse: '',
+        photo: null,
+        documents: null,
+      });
+      setErrors({});
+
+      // Clear file inputs
+      const photoInput = document.getElementById('photo-upload') as HTMLInputElement;
+      const documentsInput = document.getElementById('documents-upload') as HTMLInputElement;
+      if (photoInput) photoInput.value = '';
+      if (documentsInput) documentsInput.value = '';
+
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast({
+        title: "Submission Error",
+        description: "There was an error submitting your application. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fileType: 'photo' | 'documents') => {

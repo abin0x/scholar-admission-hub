@@ -9,6 +9,7 @@ interface Course {
   fees: string;
   description: string;
   category: string;
+  image: string;
 }
 
 const CoursesSection = () => {
@@ -19,7 +20,8 @@ const CoursesSection = () => {
       duration: "4 Years",
       fees: "$12,000/year",
       description: "Comprehensive program covering software development, algorithms, and system design.",
-      category: "Engineering"
+      category: "Engineering",
+      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=600&fit=crop"
     },
     {
       id: 2,
@@ -27,7 +29,8 @@ const CoursesSection = () => {
       duration: "3 Years",
       fees: "$10,000/year",
       description: "Learn management, finance, marketing, and entrepreneurship skills.",
-      category: "Business"
+      category: "Business",
+      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=600&fit=crop"
     },
     {
       id: 3,
@@ -35,7 +38,8 @@ const CoursesSection = () => {
       duration: "2 Years",
       fees: "$15,000/year",
       description: "Master data analysis, machine learning, and statistical modeling.",
-      category: "Technology"
+      category: "Technology",
+      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=600&fit=crop"
     },
     {
       id: 4,
@@ -43,7 +47,8 @@ const CoursesSection = () => {
       duration: "4 Years",
       fees: "$11,000/year",
       description: "Design, analysis, and manufacturing of mechanical systems.",
-      category: "Engineering"
+      category: "Engineering",
+      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=600&fit=crop"
     },
     {
       id: 5,
@@ -51,7 +56,8 @@ const CoursesSection = () => {
       duration: "1 Year",
       fees: "$8,000/year",
       description: "Modern marketing strategies for the digital age.",
-      category: "Business"
+      category: "Business",
+      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=600&fit=crop"
     },
     {
       id: 6,
@@ -59,7 +65,8 @@ const CoursesSection = () => {
       duration: "2 Years",
       fees: "$16,000/year",
       description: "Advanced AI concepts, neural networks, and machine learning.",
-      category: "Technology"
+      category: "Technology",
+      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=600&fit=crop"
     }
   ]);
 
@@ -127,12 +134,22 @@ const CoursesSection = () => {
               key={course.id}
               className="bg-card rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden group"
             >
+              <div className="relative h-48 overflow-hidden">
+                <img 
+                  src={course.image} 
+                  alt={course.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute top-4 left-4">
+                  <span className="text-sm font-medium text-white bg-primary/80 backdrop-blur-sm px-3 py-1 rounded-full">
+                    {course.category}
+                  </span>
+                </div>
+              </div>
+              
               <div className="p-6">
                 <div className="flex items-center mb-4">
                   <BookOpen className="text-primary mr-3" size={24} />
-                  <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
-                    {course.category}
-                  </span>
                 </div>
                 
                 <h3 className="text-xl font-bold text-card-foreground mb-3 group-hover:text-primary transition-colors">

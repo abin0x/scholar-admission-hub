@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
-import { Search, Edit, Trash2, Eye, Filter, Download } from 'lucide-react';
+import { Search, Edit, Trash2, Eye, Filter, Download, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import AdminLogin from './AdminLogin';
 
 interface StudentApplication {
   id: number;
@@ -16,6 +16,7 @@ interface StudentApplication {
 }
 
 const AdminPanel = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [applications, setApplications] = useState<StudentApplication[]>([]);
   const [filteredApplications, setFilteredApplications] = useState<StudentApplication[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,12 +35,34 @@ const AdminPanel = () => {
   ];
 
   useEffect(() => {
-    loadApplications();
+    // Check if admin is already logged in
+    const adminLoggedIn = localStorage.getItem('adminLoggedIn');
+    if (adminLoggedIn === 'true') {
+      setIsAuthenticated(true);
+      loadApplications();
+    }
   }, []);
 
   useEffect(() => {
-    filterApplications();
-  }, [applications, searchTerm, courseFilter]);
+    if (isAuthenticated) {
+      filterApplications();
+    }
+  }, [applications, searchTerm, courseFilter, isAuthenticated]);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+    localStorage.setItem('adminLoggedIn', 'true');
+    loadApplications();
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('adminLoggedIn');
+    toast({
+      title: "Logged Out",
+      description: "You have been logged out successfully.",
+    });
+  };
 
   const loadApplications = () => {
     const stored = localStorage.getItem('studentApplications');
@@ -124,14 +147,29 @@ const AdminPanel = () => {
     window.URL.revokeObjectURL(url);
   };
 
+  if (!isAuthenticated) {
+    return <AdminLogin onLogin={handleLogin} />;
+  }
+
   return (
     <section id="admin" className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-primary mb-4">Admin Panel</h2>
-          <p className="text-xl text-muted-foreground">
-            Manage student applications and admissions
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-4xl font-bold text-primary mb-4">Admin Panel</h2>
+              <p className="text-xl text-muted-foreground">
+                Manage student applications and admissions
+              </p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Controls */}
